@@ -75,7 +75,8 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--brand-500);cursor
 @media(max-width:1100px){.cols{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1024px){.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-2{grid-template-columns:1fr}}
 @media(max-width:768px){.sidebar{display:none}.main{padding:20px 16px 32px}.page-title{font-size:28px}.cols{grid-template-columns:1fr}.solo-movil{display:flex!important}}
-.solo-movil{display:none}
+.solo-movil{display:none!important}
+@media(max-width:768px){.solo-movil{display:flex!important}}
 /* tarjetas */
 .card{background:var(--canvas);border:1px solid var(--ink-200);border-radius:var(--r-lg)}
 .tarjeta{background:var(--canvas);border-radius:var(--r-xl);overflow:hidden}
@@ -184,6 +185,19 @@ tbody tr:hover .td{background:var(--ink-50)}
 @keyframes crecer{from{transform:scaleX(0)}}
 @keyframes mostrar{from{opacity:0;transform:translateY(4px)}}
 .mostrar{animation:mostrar 200ms var(--ease-salida)}
+/* novedades, por decidir y números */
+.nov-row{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;padding:14px 20px;border-top:1px solid var(--divider)}
+.nov-row>.num{padding-top:1px;font-weight:600;color:var(--ink-700)}
+.dec-row{display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;align-items:start;padding:14px 20px;border-top:1px solid var(--divider)}
+.dec-row .tilde{margin-top:1px}
+.dec-row .fila,.nov-row .fila{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.enlace{background:none;border:0;padding:0;color:var(--brand-500);font:inherit;font-size:13px;cursor:pointer}
+.enlace:hover{text-decoration:underline}
+.mas{border-top:1px solid var(--divider)}
+.mas summary{cursor:pointer;color:var(--brand-500);font-size:13px;padding:12px 20px}
+.kpi.fijo{cursor:default;justify-content:flex-start}.kpi.fijo:hover{background:var(--canvas)}
+@media(max-width:768px){.oculta-m{display:none}}
+@media(min-width:769px){.que{min-width:220px}}
 @media(prefers-reduced-motion:reduce){.mostrar,.barra>i,.ventana,.velo{animation:none}.btn:active:not(:disabled){scale:1}}
 </style>
 </head>
@@ -213,6 +227,7 @@ tbody tr:hover .td{background:var(--ink-50)}
     <button class="nav-item" data-v="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendario</button>
     <div class="nav-group">Estrategia</div>
     <button class="nav-item" data-v="fases"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Fases y compuertas</button>
+    <button class="nav-item" data-v="numeros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Números</button>
     <button class="nav-item" data-v="metas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Metas de contactos</button>
     <div class="nav-group">Empresa</div>
     <button class="nav-item" data-v="socios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 4a4 4 0 0 1 0 8M22 21c0-3-2-5-5-5.5"/></svg>Socios y roles</button>
@@ -227,7 +242,7 @@ tbody tr:hover .td{background:var(--ink-50)}
     </header>
 
     <nav class="tabs solo-movil" id="tabsMovil">
-      <button class="tab activa" data-v="inicio">Inicio</button><button class="tab" data-v="pasos">Paso a paso</button><button class="tab" data-v="tablero">Tablero</button><button class="tab" data-v="lista">Lista</button><button class="tab" data-v="calendario">Calendario</button><button class="tab" data-v="fases">Fases</button><button class="tab" data-v="metas">Metas</button><button class="tab" data-v="socios">Socios</button><button class="tab" data-v="documentos">Documentos</button>
+      <button class="tab activa" data-v="inicio">Inicio</button><button class="tab" data-v="pasos">Paso a paso</button><button class="tab" data-v="tablero">Tablero</button><button class="tab" data-v="lista">Lista</button><button class="tab" data-v="calendario">Calendario</button><button class="tab" data-v="fases">Fases</button><button class="tab" data-v="numeros">Números</button><button class="tab" data-v="metas">Metas</button><button class="tab" data-v="socios">Socios</button><button class="tab" data-v="documentos">Documentos</button>
     </nav>
 
     <div class="filtros" id="filtros">
@@ -276,15 +291,15 @@ const CFG = {
 const API = `https://api.github.com/repos/${CFG.owner}/${CFG.repo}/contents/${CFG.path}`;
 const ESTADOS = ["Pendiente","En curso","Bloqueado","Hecho"];
 const EST_CLS = {"Pendiente":"gris","En curso":"ambar","Bloqueado":"rojo","Hecho":"verde"};
-const VISTAS = {inicio:"Inicio",pasos:"Paso a paso",tablero:"Tablero",lista:"Lista",calendario:"Calendario",fases:"Fases y compuertas",metas:"Metas de contactos",socios:"Socios y roles",documentos:"Documentos"};
-const SIN_FILTROS = ["fases","metas","socios","documentos"];
+const VISTAS = {inicio:"Inicio",pasos:"Paso a paso",tablero:"Tablero",lista:"Lista",calendario:"Calendario",fases:"Fases y compuertas",numeros:"Números",metas:"Metas de contactos",socios:"Socios y roles",documentos:"Documentos"};
+const SIN_FILTROS = ["fases","numeros","metas","socios","documentos"];
 const REPO_URL = `https://github.com/${CFG.owner}/${CFG.repo}/blob/${CFG.branch}/`;
 const docUrl = p => REPO_URL + p.split("/").map(encodeURIComponent).join("/");
 let TOKEN=null,DATA=null,SHA=null,USER=null,VIEW="inicio",EDIT=null;
 
 const $=s=>document.querySelector(s);
 const hoyISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-const fmt=d=>d?d.split("-").reverse().join("/"):"—";
+const fmt=d=>d?esc(d).split("-").reverse().join("/"):"—";
 const days=d=>Math.round((new Date(d+"T00:00:00")-new Date(hoyISO()+"T00:00:00"))/864e5);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,"")),c=>c.charCodeAt(0)));
@@ -371,8 +386,23 @@ function dueMeta(t){
   if(d<=7)return `Vence en ${d} d`;
   return "";
 }
-const tilde=(kind,id,on,label)=>`<input type="checkbox" class="tilde" data-tilde="${kind}" data-ref="${esc(id)}"${on?" checked":""} aria-label="${esc(label)}" title="${on?"Destildar":"Marcar como hecho"}">`;
+const tilde=(kind,id,on,label)=>`<input type="checkbox" class="tilde" data-tilde="${kind}" data-ref="${esc(id)}"${on?" checked":""} aria-label="${esc(label)}" title="${on?"Destildar":kind==="d"?"Marcar como decidido":"Marcar como hecho"}">`;
 const tildeT=t=>tilde("t",t.id,t.estado==="Hecho",(t.estado==="Hecho"?"Destildar: ":"Marcar hecha: ")+t.titulo);
+const mil=v=>v==null||v===""?"—":(v<0?"−":"")+String(Math.round(Math.abs(v))).replace(/\B(?=(\d{3})+(?!\d))/g,".");
+const sig=v=>v==null||v===""?"—":(v>0?"+":"")+mil(v);
+const corta=d=>d?d.split("-").reverse().slice(0,2).join("/"):"";
+const abrir=x=>x.vista&&VISTAS[x.vista]?`<button class="enlace" data-go="${esc(x.vista)}">Ver ${esc(VISTAS[x.vista])}</button>`:x.doc?`<a class="meta" href="${docUrl(x.doc)}" target="_blank" rel="noopener">Abrir ↗</a>`:"";
+const para=f=>f?(dueMeta({estado:"",fecha:f})||`Para el ${fmt(f)}`):"";
+function novRow(n){
+  return `<div class="nov-row"><span class="meta num">${esc(corta(n.fecha))}</span><div><div class="row-title">${esc(n.titulo)}</div>
+    ${n.texto?`<div class="meta">${esc(n.texto)}</div>`:""}${abrir(n)?`<div class="fila">${abrir(n)}</div>`:""}</div></div>`;
+}
+function decRow(x){
+  const dm=x.hecho?(x.por?`Decidido por ${esc(x.por)} el ${fmt(x.el)}`:"Decidido"):para(x.para);
+  return `<div class="dec-row${x.hecho?" hecha":""}">${tilde("d",x.id,x.hecho,(x.hecho?"Destildar: ":"Marcar decidido: ")+x.tema)}
+    <div><div class="row-title">${esc(x.tema)}</div>${x.detalle?`<div class="meta">${esc(x.detalle)}</div>`:""}
+    <div class="fila">${x.quien?persona(x.quien):""}${dm?`<span class="meta">${dm}</span>`:""}${abrir(x)}</div></div></div>`;
+}
 function pasoRow(p){
   const dm=p.hecho?(p.por?`Hecho por ${esc(p.por)} el ${fmt(p.el)}`:"Hecho"):dueMeta({estado:"",fecha:p.fecha});
   return `<div class="paso-row${p.hecho?" hecha":""}">${tilde("p",p.id,p.hecho,(p.hecho?"Destildar: ":"Marcar hecho: ")+p.titulo)}
@@ -427,12 +457,18 @@ function render(){
   if(VIEW==="inicio"){
     const prox=L.filter(t=>t.estado!=="Hecho").slice(0,6);
     const sig=PS.filter(p=>!p.hecho).slice(0,4);
+    const NOV=[...(DATA.novedades||[])].sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+    const DEC=[...(DATA.porDecidir||[])].sort((a,b)=>(a.hecho?1:0)-(b.hecho?1:0));
+    const nov=NOV.length?`<section class="tarjeta"><header class="card-header">Novedades</header>${NOV.slice(0,3).map(novRow).join("")}
+      ${NOV.length>3?`<details class="mas"><summary>Anteriores (${NOV.length-3})</summary>${NOV.slice(3).map(novRow).join("")}</details>`:""}</section>`:"";
+    const dec=DEC.length?`<section class="tarjeta"><header class="card-header">Para decidir <span class="count-badge">${DEC.filter(x=>!x.hecho).length}</span></header>${DEC.map(decRow).join("")}</section>`:"";
     h=`<section class="grid-4">
       <button class="kpi" data-go="lista"><span class="kpi-rotulo"><span class="kpi-icono" style="color:var(--hoy)">${ICON.clock}</span>Atrasadas</span><span class="kpi-number ${late.length?"hoy-txt":""}">${late.length}</span></button>
       <button class="kpi" data-go="calendario"><span class="kpi-rotulo"><span class="kpi-icono">${ICON.list}</span>Vencen en 7 días</span><span class="kpi-number">${soon.length}</span></button>
       <button class="kpi" data-go="fases"><span class="kpi-rotulo"><span class="kpi-icono">${ICON.flag}</span>Compuertas de la fase</span><span class="kpi-number">${gDone}/${gates.length}</span></button>
       <button class="kpi" data-go="tablero"><span class="kpi-rotulo"><span class="kpi-icono">${ICON.bars}</span>Avance de la fase</span><span class="kpi-number">${pct}%</span></button>
     </section>
+    ${nov||dec?`<div class="grid-2">${nov}${dec}</div>`:""}
     <section class="card"><div class="card-body stack">
       <ol class="recorrido">${DATA.fases.map(f=>`<li class="${f.id<cur.id?"hecho":f.id===cur.id?"actual":""}"><span class="paso">${f.id<cur.id?"✓":f.id}</span>${esc(f.nombre)}</li>`).join("")}</ol>
       <div><div class="meta" style="margin-bottom:6px">Compuerta de la fase ${cur.id}: ${esc(cur.compuerta)}</div><div class="barra"><i style="width:${gates.length?Math.round(gDone/gates.length*100):0}%"></i></div></div>
@@ -490,6 +526,22 @@ function render(){
       ${ok2?'<span class="estado verde">Meta cumplida</span>':ok1?'<span class="estado verde">Meta 1 cumplida</span>':!m.meta1?'<span class="estado gris">Para febrero</span>':days(DATA.metaFechas?.[0]||"2099-01-01")<0?'<span class="estado rojo">Atrasada</span>':'<span class="estado ambar">En camino</span>'}</div>`}).join("")}
     <div class="card-body" style="display:flex;justify-content:flex-end"><button class="btn btn-primary" id="saveMetas">Guardar números</button></div></section>
     <section class="card"><div class="card-body meta">Se actualiza en la reunión semanal. Si al ${fmt(DATA.metaFechas?.[0])} hay menos de 3 entrevistas hechas, el problema son las horas, no el negocio. <a href="${docUrl("Fase 0/09 - Plan de contactos por persona.md")}" target="_blank" rel="noopener">Plan de contactos completo</a></div></section>`;
+  } else if(VIEW==="numeros"){
+    const N=DATA.numeros||{},B=N.base||{},C=N.corridas||[],G=[...new Set(C.map(c=>c.grupo||""))];
+    const kf=(r,v,m)=>`<div class="kpi fijo"><span class="kpi-rotulo">${esc(r)}</span><span><span class="kpi-number">${esc(v)}</span>${m?`<div class="meta" style="margin-top:6px">${esc(m)}</div>`:""}</span></div>`;
+    const dif=c=>{if(c.caja24==null||B.caja24==null)return "";const x=c.caja24-B.caja24;return `<span class="estado ${x>0?"verde":x<0?"rojo":"gris"}">${x>0?"+":""}${mil(x)}</span>`};
+    const fc=c=>`<tr style="cursor:default"><td class="td meta num oculta-m">${esc(c.id||"")}</td><td class="td que"><div>${esc(c.que)}</div>${c.nota?`<div class="meta">${esc(c.nota)}</div>`:""}</td>
+      <td class="td num oculta-m">${mil(c.resultado)}</td><td class="td num oculta-m">${mil(c.capital)}</td><td class="td num oculta-m">${c.recupera?esc(c.recupera):c.recupera===null?"No":"—"}</td>
+      <td class="td num"><b>${sig(c.caja24)}</b></td><td class="td">${dif(c)}</td></tr>`;
+    h=`<section class="grid-4">${kf("Resultado por mes",mil(B.resultado),"Promedio del año, antes del retiro y del impuesto")}${kf("Capital",mil(B.capital),B.iva?`Más ${mil(B.iva)} de IVA al contado`:"")}${kf("Recupera lo puesto",B.recupera?`Mes ${B.recupera}`:B.recupera===null?"No en 24 meses":"—","")}${kf("Caja al mes 24",sig(B.caja24),"Después del impuesto")}</section>
+    <section class="card"><div class="card-body stack"><h3 class="panel-title">${esc(N.titulo||"El plan")}</h3>${N.supuestos?`<div class="meta">${esc(N.supuestos)}</div>`:""}
+      <div class="meta">${N.confirmado?`Confirmado con el Excel el ${fmt(N.confirmado)}. `:""}${N.doc?`<a href="${docUrl(N.doc)}" target="_blank" rel="noopener">Plan completo</a>`:""}</div></div></section>
+    ${G.map(g=>{const cs=C.filter(c=>(c.grupo||"")===g);return `<section class="tarjeta"><header class="card-header">${esc(g||"Corridas")} <span class="count-badge">${cs.length}</span></header>
+      <div style="overflow:auto"><table><thead><tr><th class="th oculta-m"></th><th class="th">Qué cambia</th><th class="th oculta-m">Por mes</th><th class="th oculta-m">Capital</th><th class="th oculta-m">Recupera</th><th class="th">Caja al mes 24</th><th class="th">Contra el plan</th></tr></thead>
+      <tbody>${cs.map(fc).join("")}</tbody></table></div></section>`}).join("")}
+    ${(N.faltan||[]).length?`<section class="tarjeta"><header class="card-header">Lo que falta para afinar <span class="count-badge">${N.faltan.length}</span></header>
+      ${N.faltan.map(f=>`<div class="dec-row" style="grid-template-columns:minmax(0,1fr)"><div><div class="row-title">${esc(f.que)}</div>${f.detalle?`<div class="meta">${esc(f.detalle)}</div>`:""}
+      <div class="fila">${f.quien?persona(f.quien):""}${f.para?`<span class="meta">${para(f.para)}</span>`:""}</div></div></div>`).join("")}</section>`:""}`;
   } else if(VIEW==="documentos"){
     const G={};(DATA.documentos||[]).forEach(d=>{(G[d.grupo]=G[d.grupo]||[]).push(d)});
     h=Object.keys(G).map(g=>`<section class="tarjeta"><header class="card-header">${esc(g)} <span class="count-badge">${G[g].length}</span></header>
@@ -527,10 +579,10 @@ async function tildar(kind,id,on){
     const prev=t.estado;t.estado=on?"Hecho":"Pendiente";render();
     if(!(await save(`"${t.titulo}" → ${t.estado}`))){t.estado=prev;render()}
   }else{
-    const p=(DATA.pasos||[]).find(x=>x.id===id);if(!p)return;
+    const d=kind==="d",p=((d?DATA.porDecidir:DATA.pasos)||[]).find(x=>x.id===id);if(!p)return;
     const prev={hecho:p.hecho,por:p.por,el:p.el};
     p.hecho=on;if(on){p.por=nombre();p.el=hoyISO()}else{delete p.por;delete p.el}render();
-    if(!(await save(`paso "${p.titulo}" ${on?"hecho":"sin tildar"}`))){Object.assign(p,prev);if(prev.por===undefined){delete p.por;delete p.el}render()}
+    if(!(await save(`${d?"decisión":"paso"} "${d?p.tema:p.titulo}" ${on?(d?"tomada":"hecho"):"sin tildar"}`))){Object.assign(p,prev);if(prev.por===undefined){delete p.por;delete p.el}render()}
   }
 }
 
